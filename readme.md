@@ -1,0 +1,1 @@
+# Sokudo skeleton application
