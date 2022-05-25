@@ -87,7 +87,26 @@ func (h *Handlers) UploadToFS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) PostUploadToFS(w http.ResponseWriter, r *http.Request) {
+	fileName, err := getFileToUpload(r, "formFile")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	uploadType := r.Form.Get("upload-type")
+
+	switch uploadType {
+	case "MINIO":
+		fs := h.App.FileSystems["MINIO"].(miniofilesystem.Minio)
+		err = fs.Put(fileName, "")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	h.App.Session.Put(r.Context(), "flash", "File uploaded!")
+	http.Redirect(w, r, "/files/upload?type="+uploadType, http.StatusSeeOther)
 }
 
 func getFileToUpload(r *http.Request, fieldName string) (string, error) {
