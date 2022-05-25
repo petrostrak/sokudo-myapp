@@ -6,7 +6,7 @@ services:
   postgres:
     image: 'postgres:14'
     ports:
-      - "5432:5432"
+      - "5532:5532"
     restart: always
     environment:
       POSTGRES_USER: postgres
