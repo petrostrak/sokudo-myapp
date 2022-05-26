@@ -58,6 +58,10 @@ func (h *Handlers) ListFS(w http.ResponseWriter, r *http.Request) {
 			f := h.App.FileSystems["SFTP"].(sftpfilesystem.SFTP)
 			fs = &f
 			fsType = "SFTP"
+		case "WEBDAV":
+			f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WebDAV)
+			fs = &f
+			fsType = "WEBDAV"
 		}
 
 		l, err := fs.List(curPath)
@@ -116,6 +120,13 @@ func (h *Handlers) PostUploadToFS(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	case "WEBDAV":
+		fs := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WebDAV)
+		err = fs.Put(fileName, "")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	h.App.Session.Put(r.Context(), "flash", "File uploaded!")
@@ -162,7 +173,7 @@ func (h *Handlers) DeleteFromFS(w http.ResponseWriter, r *http.Request) {
 		f := h.App.FileSystems["SFTP"].(sftpfilesystem.SFTP)
 		fs = &f
 	case "WEBDAV":
-		f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WEBDAV)
+		f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WebDAV)
 		fs = &f
 	}
 
