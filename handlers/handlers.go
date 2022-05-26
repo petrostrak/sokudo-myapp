@@ -13,6 +13,7 @@ import (
 	"github.com/petrostrak/sokudo"
 	"github.com/petrostrak/sokudo/filesystems"
 	"github.com/petrostrak/sokudo/filesystems/miniofilesystem"
+	"github.com/petrostrak/sokudo/filesystems/sftpfilesystem"
 )
 
 // Handlers is the type for handlers, and gives access to Celeritas and models
@@ -52,6 +53,10 @@ func (h *Handlers) ListFS(w http.ResponseWriter, r *http.Request) {
 			f := h.App.FileSystems["MINIO"].(miniofilesystem.Minio)
 			fs = &f
 			fsType = "MINIO"
+		case "SFTP":
+			f := h.App.FileSystems["SFTP"].(sftpfilesystem.SFTP)
+			fs = &f
+			fsType = "SFTP"
 		}
 
 		l, err := fs.List(curPath)
