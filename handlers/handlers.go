@@ -14,6 +14,7 @@ import (
 	"github.com/petrostrak/sokudo/filesystems"
 	"github.com/petrostrak/sokudo/filesystems/miniofilesystem"
 	"github.com/petrostrak/sokudo/filesystems/sftpfilesystem"
+	"github.com/petrostrak/sokudo/filesystems/webdavfilesystem"
 )
 
 // Handlers is the type for handlers, and gives access to Celeritas and models
@@ -159,6 +160,9 @@ func (h *Handlers) DeleteFromFS(w http.ResponseWriter, r *http.Request) {
 		fs = &f
 	case "SFTP":
 		f := h.App.FileSystems["SFTP"].(sftpfilesystem.SFTP)
+		fs = &f
+	case "WEBDAV":
+		f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WEBDAV)
 		fs = &f
 	}
 
