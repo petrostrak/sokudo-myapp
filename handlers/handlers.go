@@ -13,6 +13,7 @@ import (
 	"github.com/petrostrak/sokudo"
 	"github.com/petrostrak/sokudo/filesystems"
 	"github.com/petrostrak/sokudo/filesystems/miniofilesystem"
+	"github.com/petrostrak/sokudo/filesystems/s3filesystem"
 	"github.com/petrostrak/sokudo/filesystems/sftpfilesystem"
 	"github.com/petrostrak/sokudo/filesystems/webdavfilesystem"
 )
@@ -62,6 +63,10 @@ func (h *Handlers) ListFS(w http.ResponseWriter, r *http.Request) {
 			f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WebDAV)
 			fs = &f
 			fsType = "WEBDAV"
+		case "S3":
+			f := h.App.FileSystems["S3"].(s3filesystem.S3)
+			fs = &f
+			fsType = "S3"
 		}
 
 		l, err := fs.List(curPath)
@@ -127,6 +132,13 @@ func (h *Handlers) PostUploadToFS(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	case "S3":
+		fs := h.App.FileSystems["S3"].(s3filesystem.S3)
+		err = fs.Put(fileName, "")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	h.App.Session.Put(r.Context(), "flash", "File uploaded!")
@@ -174,6 +186,9 @@ func (h *Handlers) DeleteFromFS(w http.ResponseWriter, r *http.Request) {
 		fs = &f
 	case "WEBDAV":
 		f := h.App.FileSystems["WEBDAV"].(webdavfilesystem.WebDAV)
+		fs = &f
+	case "S3":
+		f := h.App.FileSystems["S3"].(s3filesystem.S3)
 		fs = &f
 	}
 
