@@ -32,6 +32,25 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handlers) SokudoUpload(w http.ResponseWriter, r *http.Request) {
+	err := h.render(w, r, "sokudo-upload", nil, nil)
+	if err != nil {
+		h.App.ErrorLog.Println(err)
+	}
+}
+
+func (h *Handlers) PostSokudoUpload(w http.ResponseWriter, r *http.Request) {
+	err := h.App.UploadFile(r, "", "formFile", &h.App.Minio)
+	if err != nil {
+		h.App.ErrorLog.Println(err)
+		h.App.Session.Put(r.Context(), "error", err.Error())
+	} else {
+		h.App.Session.Put(r.Context(), "flash", "Uploaded!")
+	}
+
+	http.Redirect(w, r, "/upload", http.StatusSeeOther)
+}
+
 func (h *Handlers) ListFS(w http.ResponseWriter, r *http.Request) {
 	var (
 		fs   filesystems.FS

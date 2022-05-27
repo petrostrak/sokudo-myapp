@@ -12,6 +12,9 @@ func (a *application) routes() *chi.Mux {
 	// add routes here
 	a.get("/", a.Handlers.Home)
 
+	a.get("/upload", a.Handlers.SokudoUpload)
+	a.post("/upload", a.Handlers.PostSokudoUpload)
+
 	a.get("/list-fs", a.Handlers.ListFS)
 
 	a.get("/files/upload", a.Handlers.UploadToFS)
