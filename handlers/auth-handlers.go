@@ -11,6 +11,7 @@ import (
 	"myapp/data"
 
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
 
 	"github.com/CloudyKit/jet/v6"
