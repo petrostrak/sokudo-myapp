@@ -5,11 +5,16 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"myapp/data"
 
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/github"
+
 	"github.com/CloudyKit/jet/v6"
+	"github.com/gorilla/sessions"
 	"github.com/petrostrak/sokudo/mailer"
 	"github.com/petrostrak/sokudo/urlsigner"
 )
@@ -259,4 +264,23 @@ func (h *Handlers) PostResetPassword(w http.ResponseWriter, r *http.Request) {
 	// redirect
 	h.App.Session.Put(r.Context(), "flash", "Password reset. You can now log in.")
 	http.Redirect(w, r, "/users/login", http.StatusSeeOther)
+}
+
+func (h *Handlers) InitSocialAuth() {
+	scope := []string{"user"}
+	// gScope
+
+	goth.UseProviders(
+		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), os.Getenv("GITHUB_CALLBACK"), scope...),
+	)
+
+	key := os.Getenv("KEY")
+	maxAge := 86400 * 30
+	st := sessions.NewCookieStore([]byte(key))
+	st.MaxAge(maxAge)
+	st.Options.Path = "/"
+	st.Options.HttpOnly = true
+	st.Options.Secure = false
+
+	gothic.Store = st
 }
