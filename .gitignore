@@ -19,3 +19,4 @@ coverage.out
 tmp/
 vendor/
 db-data/
+sokudo
