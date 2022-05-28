@@ -15,6 +15,9 @@ func (a *application) routes() *chi.Mux {
 	a.get("/users/login", a.Handlers.UserLogin)
 	a.post("/users/login", a.Handlers.PostUserLogin)
 
+	a.get("/auth/{provider}", a.Handlers.SocialLogin)
+	a.get("/auth/{provider}/callback", a.Handlers.SocialMediaCallback)
+
 	a.get("/upload", a.Handlers.SokudoUpload)
 	a.post("/upload", a.Handlers.PostSokudoUpload)
 
