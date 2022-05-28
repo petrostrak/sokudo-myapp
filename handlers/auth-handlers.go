@@ -18,6 +18,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
+	"github.com/markbates/goth/providers/google"
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/gorilla/sessions"
@@ -276,10 +277,11 @@ func (h *Handlers) PostResetPassword(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) InitSocialAuth() {
 	scope := []string{"user"}
-	// gScope
+	gScope := []string{"email", "profile"}
 
 	goth.UseProviders(
 		github.New(os.Getenv("GITHUB_KEY"), os.Getenv("GITHUB_SECRET"), os.Getenv("GITHUB_CALLBACK"), scope...),
+		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), os.Getenv("GOOGLE_CALLBACK"), gScope...),
 	)
 
 	key := os.Getenv("KEY")
@@ -334,7 +336,8 @@ func (h *Handlers) SocialMediaCallback(w http.ResponseWriter, r *http.Request) {
 				newUser.LastName = exploded[1]
 			}
 		} else {
-
+			newUser.FirstName = gUser.FirstName
+			newUser.LastName = gUser.LastName
 		}
 
 		newUser.Email = gUser.Email
