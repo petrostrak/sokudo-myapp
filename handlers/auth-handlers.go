@@ -333,6 +333,7 @@ func (h *Handlers) SocialMediaCallback(w http.ResponseWriter, r *http.Request) {
 
 		}
 
+		newUser.Email = gUser.Email
 		newUser.Active = 1
 		newUser.Password = h.randomString(20)
 		newUser.CreatedAt = time.Now()
