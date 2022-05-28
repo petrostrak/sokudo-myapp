@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -109,6 +111,8 @@ func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 		rt := data.RememberToken{}
 		_ = rt.Delete(h.App.Session.GetString(r.Context(), "remember_token"))
 	}
+
+	h.socialLogout(w, r)
 
 	// delete cookie
 	newCookie := http.Cookie{
@@ -352,4 +356,45 @@ func (h *Handlers) SocialMediaCallback(w http.ResponseWriter, r *http.Request) {
 	h.App.Session.Put(r.Context(), "social_email", gUser.Email)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *Handlers) socialLogout(w http.ResponseWriter, r *http.Request) {
+	provider, ok := h.App.Session.Get(r.Context(), "social_provider").(string)
+	if !ok {
+		return
+	}
+
+	//  call the appropriate api for our provider and revoke
+	// the auth token. Each provider has different login for
+	// doing this (is it exists at all)
+	switch provider {
+	case "github":
+		clientID := os.Getenv("GITHUB_KEY")
+		clientSecret := os.Getenv("GITHUB_SECRET")
+
+		token := h.App.Session.Get(r.Context(), "social_token").(string)
+
+		var payload struct {
+			AccessToken string `json:"access_token"`
+		}
+		payload.AccessToken = token
+
+		jsonReq, _ := json.Marshal(payload)
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("https://%s:%s@api.github.com/applications/%s/grant", clientID, clientSecret, clientID),
+			bytes.NewBuffer(jsonReq),
+		)
+		if err != nil {
+			h.App.ErrorLog.Println(err)
+			return
+		}
+
+		client := &http.Client{}
+		_, err = client.Do(req)
+		if err != nil {
+			h.App.ErrorLog.Println("error logging out of Github:", err)
+		}
+	case "google":
+	}
 }
