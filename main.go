@@ -3,10 +3,15 @@
 package main
 
 import (
-	"github.com/petrostrak/sokudo"
 	"myapp/data"
 	"myapp/handlers"
 	"myapp/middleware"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
+	"github.com/petrostrak/sokudo"
 )
 
 type application struct {
@@ -14,9 +19,31 @@ type application struct {
 	Handlers   *handlers.Handlers
 	Models     data.Models
 	Middleware *middleware.Middleware
+	wg         sync.WaitGroup
 }
 
 func main() {
 	s := initApplication()
-	s.App.ListenAndServe()
+	go s.listenForShutdown()
+	err := s.App.ListenAndServe()
+	s.App.ErrorLog.Println(err)
+}
+
+func (a *application) shutdown() {
+	// put any clean up task here
+
+	// block until the WaitGroup is empty
+	a.wg.Wait()
+}
+
+func (a *application) listenForShutdown() {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	s := <-quit
+	a.App.InfoLog.Println("Received signal", s.String())
+
+	a.shutdown()
+
+	os.Exit(0)
 }
